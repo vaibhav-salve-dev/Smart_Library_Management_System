@@ -44,4 +44,33 @@ export class UsersService {
       }
     }
   }
+  async findByEmail(email:string)
+{
+   try{
+
+      console.log("email :",email);
+      let result = await this.userModel.findOne({email});
+      if(!result)
+      {
+        return {
+          sucess:false,
+          message:"User Not Found !"
+        }
+      }
+      return {
+         success:true,
+         user:result
+      }
+
+   }catch(error){
+
+      console.log("find user error:",error);
+
+      return {
+         success:false,
+         message:"Something went wrong!"
+      }
+
+   }
+}
 }

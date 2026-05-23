@@ -16,5 +16,14 @@ export class AuthController {
         return this.authService.findAllUser();
     }
 
+    @Post("/login")
+    getUser(@Body() body)
+    {
+        // console.log("body:",body.email);
+        return this.authService.findUser(body)
+        // return body;
+    }
+
+
 
 }

@@ -5,6 +5,9 @@ export class RegisterDto{
     @Matches(/^[A-Za-z ]+$/)
     name!:string;
 
+    @IsEmail()
+    email!:string;
+    
     @MinLength(6)
     password!:string;
 
