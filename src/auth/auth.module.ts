@@ -4,12 +4,12 @@ import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from '../users/users.module'
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [UsersModule,JwtModule.registerAsync({
 
   useFactory: () => ({
-
     secret: process.env.secret,
 
     signOptions:{
@@ -20,6 +20,6 @@ import { JwtModule } from '@nestjs/jwt';
 
 })],
   controllers: [AuthController],
-  providers: [AuthService]
+  providers: [AuthService,JwtStrategy]
 })
 export class AuthModule {}

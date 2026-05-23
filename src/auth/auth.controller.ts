@@ -1,6 +1,9 @@
 import { Controller,Post,Body,Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+
 @Controller('auth')
 export class AuthController {
     constructor(private authService:AuthService){}
@@ -10,6 +13,7 @@ export class AuthController {
         return this.authService.registerUser(body);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get("/users")
     getAllUsers()
     {

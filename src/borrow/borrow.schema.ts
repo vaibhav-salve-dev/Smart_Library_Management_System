@@ -1,21 +1,36 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import {
+  Schema,
+  Prop,
+  SchemaFactory
+} from '@nestjs/mongoose';
 
 @Schema({
-    timestamps:true
+  timestamps:true
 })
-export class Borrow{
-    @Prop()
-    userId!:string;
-    
-    @Prop()
-    bookId!:string;
-    
-    @Prop()
-    borrowedAt!:Date;
-    
-    @Prop()
-    returnedAt!:Date;
-    
 
+export class Borrow {
+
+  @Prop({
+    required:true
+  })
+  userEmail!:string;
+
+  @Prop({
+    required:true
+  })
+  bookId!:string;
+
+  @Prop({
+    enum:["borrowed","returned"],
+    default:"borrowed"
+  })
+  status!:string;
+
+  @Prop({
+    default:null
+  })
+  returnedAt!:Date;
 }
-export const BorrowSchema = SchemaFactory.createForClass(Borrow);
+
+export const BorrowSchema =
+  SchemaFactory.createForClass(Borrow);
