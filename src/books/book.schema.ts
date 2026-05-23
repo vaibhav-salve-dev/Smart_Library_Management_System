@@ -5,10 +5,11 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 })
 export class Book {
     @Prop({
-        required: true,
-        trim: true
-    })
-    title!: string;
+  required: true,
+  trim: true,
+  minlength: 3
+})
+title!: string;
 
     @Prop()
     author!: string;
@@ -19,8 +20,16 @@ export class Book {
     @Prop()
     description!: string;
 
-    @Prop()
-    publishYear!: number;
+    @Prop({
+  required: true,
+  validate: {
+    validator: function (value: number) {
+      return value <= new Date().getFullYear();
+    },
+    message: 'Published year cannot be in the future'
+  }
+})
+publishYear!: number;
 
     @Prop({
         min: 1,
@@ -46,4 +55,5 @@ export class Book {
     createdBy!: string;
 
 }
+
 export const BookSchema = SchemaFactory.createForClass(Book);

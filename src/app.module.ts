@@ -6,11 +6,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { BooksModule } from './books/books.module';
+import { BorrowModule } from './borrow/borrow.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
    isGlobal:true
-}),AuthModule,MongooseModule.forRoot('mongodb://localhost:27017/library'), UsersModule,BooksModule],
+}),AuthModule,MongooseModule.forRoot('mongodb://localhost:27017/library'), UsersModule,BooksModule, BorrowModule],
   controllers: [AppController],
   providers: [AppService],
 })

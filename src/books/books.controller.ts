@@ -1,4 +1,4 @@
-import {Controller,Get,Post,Patch,Body,Param,Delete,UseGuards,Request} from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Delete, UseGuards, Request } from '@nestjs/common';
 
 import { BooksService } from './books.service';
 
@@ -14,12 +14,9 @@ export class BooksController {
         private readonly books: BooksService
     ) { }
 
-    // ADMIN + MEMBER
 
     @UseGuards(AuthGuard('jwt'))
-
     @Post("/add")
-
     async addBook(
         @Body() body,
         @Request() req
@@ -27,27 +24,23 @@ export class BooksController {
         return this.books.add(body, req.user);
     }
 
-    // LOGGED IN USERS
+
 
     @UseGuards(AuthGuard('jwt'))
-
     @Get()
-
-    getAllBooks() {
-        return this.books.findAllBooks();
+    getAllBooks(@Request() req) {
+        return this.books.findAllBooks(req.query);
     }
 
-    // LOGGED IN USERS
+
 
     @UseGuards(AuthGuard('jwt'))
-
     @Get(":id")
-
     getBook(@Param("id") id: string) {
         return this.books.getBook(id);
     }
 
-    // ONLY OWNER OR ADMIN
+
 
     @UseGuards(AuthGuard('jwt'))
 
@@ -65,12 +58,10 @@ export class BooksController {
         );
     }
 
-    // ONLY ADMIN
+
 
     @UseGuards(AuthGuard('jwt'), RolesGuard)
-
     @Delete(":id")
-
     deleteBook(
         @Param("id") id: string
     ) {

@@ -20,7 +20,14 @@ export class BooksService {
     try {
 
       body.createdBy = user.email;
-
+      const exist=await this.bookModel.findOne({title:body.title,author:body.author})
+        if(exist)
+        {
+            return{
+                sucess:false,
+                message:"Book already exist !"
+            }
+        }
       const result = await this.bookModel.create(body);
 
       return {
@@ -39,26 +46,80 @@ export class BooksService {
     }
   }
 
-  async findAllBooks()
-  {
-    try {
+ async findAllBooks(query: any) {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      genre,
+      rating,
+      isFavourite,
+      sortBy = "createdAt",
+      order = "desc"
+    } = query;
 
-      const result = await this.bookModel.find();
+    const filter: any = {};
 
-      return {
-        success:true,
-        books:result
-      }
-
-    } catch(error) {
-
-      return {
-        success:false,
-        message:"Something went wrong"
-      }
-
+    // 🔍 SEARCH (title OR author)
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { author: { $regex: search, $options: "i" } }
+      ];
     }
+
+    // 🎭 GENRE FILTER
+    if (genre) {
+      filter.genre = genre;
+    }
+
+    // ⭐ RATING FILTER
+    if (rating) {
+      filter.rating = Number(rating);
+    }
+
+    // ❤️ FAVORITE FILTER
+    if (isFavourite !== undefined) {
+      filter.isFavourite = isFavourite === "true";
+    }
+
+    // 📄 PAGINATION
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // ↕️ SORTING
+    const sortOrder = order === "asc" ? 1 : -1;
+
+    const sort: any = {
+      [sortBy]: sortOrder
+    };
+
+    // 🔥 QUERY EXECUTION
+    const books = await this.bookModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(Number(limit));
+
+    // 📊 TOTAL COUNT (for pagination metadata)
+    const total = await this.bookModel.countDocuments(filter);
+
+    return {
+      success: true,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / Number(limit)),
+      totalRecords: total,
+      books
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      message: "Something went wrong"
+    };
   }
+}
 
   async getBook(id:string)
   {
