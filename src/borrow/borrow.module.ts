@@ -6,15 +6,9 @@ import { BorrowService } from './borrow.service';
 
 import { MongooseModule } from '@nestjs/mongoose';
 
-import {
-  Borrow,
-  BorrowSchema
-} from './borrow.schema';
+import {  Borrow, BorrowSchema } from './borrow.schema';
 
-import {
-  Book,
-  BookSchema
-} from '../books/book.schema';
+import { Book, BookSchema } from '../books/book.schema';
 
 @Module({
 

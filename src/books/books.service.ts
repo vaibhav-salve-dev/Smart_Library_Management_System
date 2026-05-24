@@ -4,15 +4,10 @@ import { Book } from './book.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
-
 export class BooksService {
-
   constructor(
-
     @InjectModel(Book.name)
-
     private bookModel: Model<Book>
-
   ) {}
 
   async add(body, user)

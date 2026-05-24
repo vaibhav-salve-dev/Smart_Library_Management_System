@@ -1,55 +1,36 @@
-import {Injectable,ForbiddenException,NotFoundException
-} from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 
-import { InjectModel }
-from '@nestjs/mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
-import { Model }
-from 'mongoose';
+import { Model } from 'mongoose';
 
-import {
-  Borrow
-} from './borrow.schema';
+import { Borrow } from './borrow.schema';
 
-import {
-  Book
-} from '../books/book.schema';
+import { Book } from '../books/book.schema';
 
 @Injectable()
-
 export class BorrowService {
-
-constructor(
-
-   @InjectModel(Borrow.name)
-
-   private borrowModel:Model<Borrow>,
-
-   @InjectModel(Book.name)
-
-   private bookModel:Model<Book>
-
-){}
-
-  // BORROW BOOK
+  constructor(
+    @InjectModel(Borrow.name)
+    private borrowModel: Model<Borrow>,
+    @InjectModel(Book.name)
+    private bookModel: Model<Book>
+  ) { }
 
   async borrowBook(
-    bookId:string,
+    bookId: string,
     user
-  )
-  {
+  ) {
     const book =
       await this.bookModel.findById(bookId);
 
-    if(!book)
-    {
+    if (!book) {
       throw new NotFoundException(
         "Book not found"
       );
     }
 
-    if(book.status === "borrowed")
-    {
+    if (book.status === "borrowed") {
       throw new ForbiddenException(
         "Book already borrowed"
       );
@@ -58,13 +39,12 @@ constructor(
     const count =
       await this.borrowModel.countDocuments({
 
-        userEmail:user.email,
-        status:"borrowed"
+        userEmail: user.email,
+        status: "borrowed"
 
       });
 
-    if(count >= 3)
-    {
+    if (count >= 3) {
       throw new ForbiddenException(
         "Borrow limit exceeded"
       );
@@ -72,8 +52,8 @@ constructor(
 
     await this.borrowModel.create({
 
-      userEmail:user.email,
-      bookId:bookId
+      userEmail: user.email,
+      bookId: bookId
 
     });
 
@@ -83,30 +63,26 @@ constructor(
 
     return {
 
-      success:true,
-      message:"Book borrowed successfully"
+      success: true,
+      message: "Book borrowed successfully"
 
     };
   }
 
-  // RETURN BOOK
-
   async returnBook(
-    bookId:string,
+    bookId: string,
     user
-  )
-  {
+  ) {
     const borrow =
       await this.borrowModel.findOne({
 
-        bookId:bookId,
-        userEmail:user.email,
-        status:"borrowed"
+        bookId: bookId,
+        userEmail: user.email,
+        status: "borrowed"
 
       });
 
-    if(!borrow)
-    {
+    if (!borrow) {
       throw new ForbiddenException(
         "No borrowed book found"
       );
@@ -121,8 +97,7 @@ constructor(
     const book =
       await this.bookModel.findById(bookId);
 
-    if(book)
-    {
+    if (book) {
       book.status = "available";
 
       await book.save();
@@ -130,27 +105,24 @@ constructor(
 
     return {
 
-      success:true,
-      message:"Book returned successfully"
+      success: true,
+      message: "Book returned successfully"
 
     };
   }
 
-  // HISTORY
-
-  async history(user)
-  {
+  async history(user) {
     const result =
       await this.borrowModel.find({
 
-        userEmail:user.email
+        userEmail: user.email
 
       });
 
     return {
 
-      success:true,
-      history:result
+      success: true,
+      history: result
 
     };
   }

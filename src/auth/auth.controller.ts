@@ -1,6 +1,7 @@
 import { Controller,Post,Body,Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -21,7 +22,7 @@ export class AuthController {
     }
 
     @Post("/login")
-    getUser(@Body() body)
+    getUser(@Body() body:LoginDto)
     {
         // console.log("body:",body.email);
         return this.authService.findUser(body)
