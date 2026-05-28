@@ -38,11 +38,6 @@ export class Book {
   rating!: number;
 
   @Prop({
-    default: false
-  })
-  isFavourite!: boolean;
-
-  @Prop({
     enum: ["available", "borrowed"],
     default: "available"
   })

@@ -4,6 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import {RateLimitGuard} from '../common/guards/login_throttler.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +21,7 @@ export class AuthController {
         return this.authService.findAllUser();
     }
 
+    @UseGuards(RateLimitGuard)
     @Post("/login")
     getUser(@Body() body: LoginDto) {
         // console.log("body:",body.email);

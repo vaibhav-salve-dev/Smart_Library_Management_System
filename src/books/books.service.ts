@@ -5,6 +5,7 @@ import { Borrow } from '../borrow/borrow.schema';
 import { Model } from 'mongoose';
 import { Inject } from '@nestjs/common';
 import { SortOrder, Types } from 'mongoose';
+import { Favorite } from "../favorite/favorite.schema";
 
 @Injectable()
 export class BooksService {
@@ -14,6 +15,8 @@ export class BooksService {
     private bookModel: Model<Book>,
     @InjectModel(Borrow.name)
     private borrowModel: Model<Borrow>,
+    @InjectModel(Favorite.name)
+    private favoriteModel: Model<Favorite>,
   ) { }
 
   async add(body, file, user) {
@@ -72,13 +75,17 @@ export class BooksService {
     }
   }
 
-  async findAllBooks(query: any) {
+  async findAllBooks(
+  query: any,
+  user,
+) {
     try {
       const {
         page = 1,
         limit = 10,
         search = "",
         genre = "",
+        sortBy = "createdAt",
         sortOrder = "desc",
         minRating,
         status,
@@ -125,11 +132,21 @@ export class BooksService {
       }
 
 
-      const sort: Record<string, SortOrder> = {
-        createdAt:
-          (sortOrder === "desc" ? -1 : 1) as SortOrder,
-      };
+      const allowedSortFields = [
+        "createdAt",
+        "title",
+        "author",
+      ];
 
+      const sortField =
+        allowedSortFields.includes(sortBy)
+          ? sortBy
+          : "createdAt";
+
+      const sort: Record<string, SortOrder> = {
+        [sortField]:
+          sortOrder === "desc" ? -1 : 1,
+      };
 
       const skip =
         (Number(page) - 1) * Number(limit);
@@ -144,7 +161,23 @@ export class BooksService {
         .skip(skip)
         .limit(Number(limit))
         .lean();
+const favorites =
+  await this.favoriteModel.find({
+    userEmail: user.email,
+  });
+  const favoriteBookIds =
+  favorites.map(
+    (fav) => fav.bookId
+  );
+  const updatedBooks =
+  books.map((book: any) => ({
+    ...book,
 
+    isFavorite:
+      favoriteBookIds.includes(
+        book._id.toString()
+      ),
+  }));
       const totalBooks =
         await this.bookModel.countDocuments(filter);
 
@@ -154,7 +187,7 @@ export class BooksService {
 
       return {
         success: true,
-        books,
+        books: updatedBooks,
         page: Number(page),
         totalPages,
         hasMore: Number(page) < totalPages,
@@ -210,7 +243,7 @@ export class BooksService {
         );
       }
 
-   
+
       if (
         user.role !== "admin" &&
         book.createdBy !== user.email
@@ -279,6 +312,40 @@ export class BooksService {
       throw error;
 
     }
+  }
+
+  async toggleFavorite(
+    bookId: string,
+    user,
+  ) {
+
+    const exist =
+      await this.favoriteModel.findOne({
+        bookId,
+        userEmail: user.email,
+      });
+
+    if (exist) {
+
+      await this.favoriteModel.findByIdAndDelete(
+        exist._id
+      );
+
+      return {
+        success: true,
+        isFavorite: false,
+      };
+    }
+
+    await this.favoriteModel.create({
+      bookId,
+      userEmail: user.email,
+    });
+
+    return {
+      success: true,
+      isFavorite: true,
+    };
   }
 
 }

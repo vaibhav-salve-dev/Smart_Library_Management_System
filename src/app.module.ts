@@ -8,10 +8,15 @@ import { ConfigModule } from '@nestjs/config';
 import { BooksModule } from './books/books.module';
 import { BorrowModule } from './borrow/borrow.module';
 import { CloudinaryProvider } from './config/cloudinary.provider';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true
-  }), AuthModule, MongooseModule.forRoot('mongodb://localhost:27017/library'), UsersModule, BooksModule, BorrowModule],
+  }), ThrottlerModule.forRoot([{
+      ttl: 5000, // 15 minutes (in milliseconds)
+      limit: 1,    // 5 requests
+    }]),AuthModule, MongooseModule.forRoot('mongodb://localhost:27017/library'), UsersModule, BooksModule, BorrowModule, AnalyticsModule],
   controllers: [AppController],
   providers: [AppService, CloudinaryProvider],
   exports: [CloudinaryProvider]
