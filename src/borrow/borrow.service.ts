@@ -64,7 +64,8 @@ export class BorrowService {
     return {
 
       success: true,
-      message: "Book borrowed successfully"
+      message: "Book borrowed successfully",
+      book
 
     };
   }
@@ -106,23 +107,40 @@ export class BorrowService {
     return {
 
       success: true,
-      message: "Book returned successfully"
+      message: "Book returned successfully",
+      book
 
     };
   }
 
   async history(user) {
     const result =
+      await this.borrowModel
+        .find({
+          userEmail: user.email
+        })
+        .populate("bookId");
+
+    return {
+
+      success: true,
+      history: result
+
+    };
+  }
+
+  async activeBorrows() {
+    const borrows =
       await this.borrowModel.find({
 
-        userEmail: user.email
+        status: "borrowed"
 
       });
 
     return {
 
       success: true,
-      history: result
+      borrows
 
     };
   }

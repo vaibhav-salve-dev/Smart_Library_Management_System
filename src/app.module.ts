@@ -7,13 +7,14 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { BooksModule } from './books/books.module';
 import { BorrowModule } from './borrow/borrow.module';
-
+import { CloudinaryProvider } from './config/cloudinary.provider';
 @Module({
   imports: [ConfigModule.forRoot({
-   isGlobal:true
-}),AuthModule,MongooseModule.forRoot('mongodb://localhost:27017/library'), UsersModule,BooksModule, BorrowModule],
+    isGlobal: true
+  }), AuthModule, MongooseModule.forRoot('mongodb://localhost:27017/library'), UsersModule, BooksModule, BorrowModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CloudinaryProvider],
+  exports: [CloudinaryProvider]
 })
 export class AppModule {
 }

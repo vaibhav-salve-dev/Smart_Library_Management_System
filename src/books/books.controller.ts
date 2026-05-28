@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Patch, Body, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import {Controller,Get,Post,Patch,Body,Param,Delete,UseGuards,Request,UseInterceptors,UploadedFile} from '@nestjs/common';
 import { BooksService } from './books.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('books')
 export class BooksController {
@@ -9,14 +10,30 @@ export class BooksController {
         private readonly books: BooksService
     ) { }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Post("/add")
-    async addBook(
-        @Body() body,
-        @Request() req
-    ) {
-        return this.books.add(body, req.user);
-    }
+   @UseGuards(AuthGuard('jwt'))
+
+@Post("/add")
+
+@UseInterceptors(
+  FileInterceptor(
+  "coverImage",
+  {
+    dest: "./uploads"
+  }
+)
+)
+
+async addBook(
+  @UploadedFile() file,
+  @Body() body,
+  @Request() req
+) {
+  return this.books.add(
+    body,
+    file,
+    req.user
+  );
+}
 
     @UseGuards(AuthGuard('jwt'))
     @Get()
@@ -31,18 +48,28 @@ export class BooksController {
     }
 
     @UseGuards(AuthGuard('jwt'))
-    @Patch(":id")
-    updateBook(
-        @Param("id") id: string,
-        @Body() body,
-        @Request() req
-    ) {
-        return this.books.updateBook(
-            id,
-            body,
-            req.user
-        );
-    }
+
+@Patch(":id")
+
+@UseInterceptors(
+  FileInterceptor("coverImage", {
+    dest: "./uploads",
+  }),
+)
+
+updateBook(
+  @Param("id") id: string,
+  @UploadedFile() file,
+  @Body() body,
+  @Request() req,
+) {
+  return this.books.updateBook(
+    id,
+    body,
+    file,
+    req.user,
+  );
+}
 
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Delete(":id")

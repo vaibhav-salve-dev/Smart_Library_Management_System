@@ -4,6 +4,9 @@ import {
   SchemaFactory
 } from '@nestjs/mongoose';
 
+import mongoose from 'mongoose';
+import { Book } from '../books/book.schema';
+
 @Schema({
   timestamps:true
 })
@@ -16,9 +19,11 @@ export class Borrow {
   userEmail!:string;
 
   @Prop({
-    required:true
-  })
-  bookId!:string;
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Book',
+  required: true
+})
+bookId!: mongoose.Types.ObjectId;
 
   @Prop({
     enum:["borrowed","returned"],
@@ -30,6 +35,8 @@ export class Borrow {
     default:null
   })
   returnedAt!:Date;
+
+  
 }
 
 export const BorrowSchema =

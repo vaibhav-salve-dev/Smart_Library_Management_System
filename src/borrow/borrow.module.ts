@@ -6,34 +6,34 @@ import { BorrowService } from './borrow.service';
 
 import { MongooseModule } from '@nestjs/mongoose';
 
-import {  Borrow, BorrowSchema } from './borrow.schema';
+import { Borrow, BorrowSchema } from './borrow.schema';
 
 import { Book, BookSchema } from '../books/book.schema';
 
 @Module({
 
-  imports:[
+  imports: [
 
     MongooseModule.forFeature([
 
       {
-        name:Borrow.name,
-        schema:BorrowSchema
+        name: Borrow.name,
+        schema: BorrowSchema
       },
 
       {
-        name:Book.name,
-        schema:BookSchema
+        name: Book.name,
+        schema: BookSchema
       }
 
     ])
 
   ],
 
-  controllers:[BorrowController],
+  controllers: [BorrowController],
 
-  providers:[BorrowService]
+  providers: [BorrowService]
 
 })
 
-export class BorrowModule {}
+export class BorrowModule { }
