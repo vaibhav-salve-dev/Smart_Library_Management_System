@@ -10,6 +10,7 @@ import { BorrowModule } from './borrow/borrow.module';
 import { CloudinaryProvider } from './config/cloudinary.provider';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true

@@ -62,23 +62,31 @@ export class BooksService {
 
       };
 
-    } catch (error) {
+    } catch (error: any) {
 
-      console.log("image error: ", error)
-      return {
+      // console.log("image error: ", error)
+      if (error.name === "ValidationError") {
 
-        success: false,
-        message: "Something went wrong"
+        const validationErrors = {};
 
-      };
+        for (const field in error.errors) {
+          validationErrors[field] =
+            error.errors[field].message;
+        }
 
+        return {
+          success: false,
+          message: "Validation failed",
+          errors: validationErrors,
+        };
+      }
     }
   }
 
   async findAllBooks(
-  query: any,
-  user,
-) {
+    query: any,
+    user,
+  ) {
     try {
       const {
         page = 1,
@@ -161,23 +169,23 @@ export class BooksService {
         .skip(skip)
         .limit(Number(limit))
         .lean();
-const favorites =
-  await this.favoriteModel.find({
-    userEmail: user.email,
-  });
-  const favoriteBookIds =
-  favorites.map(
-    (fav) => fav.bookId
-  );
-  const updatedBooks =
-  books.map((book: any) => ({
-    ...book,
+      const favorites =
+        await this.favoriteModel.find({
+          userEmail: user.email,
+        });
+      const favoriteBookIds =
+        favorites.map(
+          (fav) => fav.bookId
+        );
+      const updatedBooks =
+        books.map((book: any) => ({
+          ...book,
 
-    isFavorite:
-      favoriteBookIds.includes(
-        book._id.toString()
-      ),
-  }));
+          isFavorite:
+            favoriteBookIds.includes(
+              book._id.toString()
+            ),
+        }));
       const totalBooks =
         await this.bookModel.countDocuments(filter);
 
@@ -271,7 +279,9 @@ const favorites =
         await this.bookModel.findByIdAndUpdate(
           id,
           body,
-          { new: true }
+          { new: true,
+            runValidators: true,
+          }
         );
 
       return {
@@ -279,9 +289,23 @@ const favorites =
         book: result,
       };
 
-    } catch (error) {
+    } catch (error: any) {
 
-      throw error;
+      if (error.name === "ValidationError") {
+
+        const validationErrors = {};
+
+        for (const field in error.errors) {
+          validationErrors[field] =
+            error.errors[field].message;
+        }
+
+        return {
+          success: false,
+          message: "Validation failed",
+          errors: validationErrors,
+        };
+      }
 
     }
   }

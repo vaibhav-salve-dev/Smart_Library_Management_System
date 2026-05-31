@@ -34,12 +34,15 @@ export class UsersService {
         success: true,
         message: "User created successfully",
         user: result
-
       }
 
     } catch (err) {
 
-      throw err;
+      return{
+        success:false,
+        message:"Unable to register !",
+        error:err
+      }
 
     }
 

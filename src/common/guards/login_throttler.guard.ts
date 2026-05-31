@@ -35,8 +35,7 @@ export class RateLimitGuard implements CanActivate {
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
-
-    // Add current request timestamp
+    
     timestamps.push(now);
     requests.set(key, timestamps);
     console.log(`Login allowed. Next attempt allowed after 1 hour`);

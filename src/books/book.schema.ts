@@ -7,7 +7,7 @@ export class Book {
   @Prop({
     required: true,
     trim: true,
-    minlength: 3
+    minlength: [3,"Title must be at least 3 characters"]
   })
   title!: string;
 
@@ -32,8 +32,8 @@ export class Book {
   publishYear!: number;
 
   @Prop({
-    min: 1,
-    max: 5
+    min: [1, "Rating must be at least 1"],
+    max: [5, "Rating cannot exceed 5"],
   })
   rating!: number;
 
