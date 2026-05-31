@@ -6,6 +6,8 @@ import { Model } from 'mongoose';
 import { Inject } from '@nestjs/common';
 import { SortOrder, Types } from 'mongoose';
 import { Favorite } from "../favorite/favorite.schema";
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class BooksService {
@@ -17,7 +19,22 @@ export class BooksService {
     private borrowModel: Model<Borrow>,
     @InjectModel(Favorite.name)
     private favoriteModel: Model<Favorite>,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) { }
+
+  private async invalidateBooksCache() {
+
+  const version =
+    await this.cacheManager.get(
+      "books-version"
+    ) || 1;
+
+  await this.cacheManager.set(
+    "books-version",
+    Number(version) + 1,
+  );
+}
 
   async add(body, file, user) {
     try {
@@ -54,6 +71,8 @@ export class BooksService {
       const result =
         await this.bookModel.create(body);
 
+      await this.invalidateBooksCache();
+
       return {
 
         success: true,
@@ -88,6 +107,22 @@ export class BooksService {
     user,
   ) {
     try {
+     const version =
+  await this.cacheManager.get(
+    "books-version"
+  ) || 1;
+
+const cacheKey =
+  `books:v${version}:${user.email}:${JSON.stringify(query)}`;
+      const cachedData =
+        await this.cacheManager.get(cacheKey);
+
+      if (cachedData) {
+
+        console.log("CACHE HIT");
+
+        return cachedData;
+      }
       const {
         page = 1,
         limit = 10,
@@ -193,13 +228,21 @@ export class BooksService {
         totalBooks / Number(limit)
       );
 
-      return {
+      const response = {
         success: true,
         books: updatedBooks,
         page: Number(page),
         totalPages,
         hasMore: Number(page) < totalPages,
       };
+
+      await this.cacheManager.set(
+        cacheKey,
+        response,
+        60000
+      );
+
+      return response;
 
     } catch (error) {
 
@@ -213,7 +256,17 @@ export class BooksService {
   }
   async getBook(id: string) {
     try {
+      const cacheKey = `book:${id}`;
 
+      const cached =
+        await this.cacheManager.get(cacheKey);
+
+      if (cached) {
+
+        console.log("BOOK CACHE HIT");
+
+        return cached;
+      }
       const result = await this.bookModel.findById(id);
 
       if (!result) {
@@ -222,10 +275,18 @@ export class BooksService {
         );
       }
 
-      return {
+      const response = {
         success: true,
         book: result
-      }
+      };
+
+      await this.cacheManager.set(
+        cacheKey,
+        response,
+        60000
+      );
+
+      return response;
 
     } catch (error) {
 
@@ -279,11 +340,12 @@ export class BooksService {
         await this.bookModel.findByIdAndUpdate(
           id,
           body,
-          { new: true,
+          {
+            new: true,
             runValidators: true,
           }
         );
-
+await this.invalidateBooksCache();
       return {
         success: true,
         book: result,
@@ -320,11 +382,15 @@ export class BooksService {
       const result =
         await this.bookModel.findByIdAndDelete(id);
 
+      await this.invalidateBooksCache();
+      
       if (!result) {
         throw new NotFoundException(
           "Book not found"
         );
       }
+
+      await this.cacheManager.clear();
 
       return {
         success: true,
@@ -355,6 +421,10 @@ export class BooksService {
         exist._id
       );
 
+      await this.cacheManager.del(
+        `analytics:${user.email}`
+      );
+
       return {
         success: true,
         isFavorite: false,
@@ -365,6 +435,10 @@ export class BooksService {
       bookId,
       userEmail: user.email,
     });
+
+    await this.cacheManager.del(
+      `analytics:${user.email}`
+    );
 
     return {
       success: true,

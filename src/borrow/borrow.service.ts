@@ -7,14 +7,18 @@ import { Model } from 'mongoose';
 import { Borrow } from './borrow.schema';
 
 import { Book } from '../books/book.schema';
-
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject } from '@nestjs/common';
+import type { Cache } from 'cache-manager';
 @Injectable()
 export class BorrowService {
   constructor(
     @InjectModel(Borrow.name)
     private borrowModel: Model<Borrow>,
     @InjectModel(Book.name)
-    private bookModel: Model<Book>
+    private bookModel: Model<Book>,
+     @Inject(CACHE_MANAGER)
+  private cacheManager: Cache,
   ) { }
 
   async borrowBook(
@@ -60,6 +64,9 @@ export class BorrowService {
     book.status = "borrowed";
 
     await book.save();
+    await this.cacheManager.del(
+  `analytics:${user.email}`
+);
 
     return {
 
@@ -94,6 +101,7 @@ export class BorrowService {
     borrow.returnedAt = new Date();
 
     await borrow.save();
+    
 
     const book =
       await this.bookModel.findById(bookId);
@@ -102,6 +110,9 @@ export class BorrowService {
       book.status = "available";
 
       await book.save();
+      await this.cacheManager.del(
+  `analytics:${user.email}`
+);
     }
 
     return {

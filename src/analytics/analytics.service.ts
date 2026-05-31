@@ -1,14 +1,12 @@
 import { Injectable } from "@nestjs/common";
-
 import { InjectModel } from "@nestjs/mongoose";
-
 import { Model } from "mongoose";
-
 import { Book } from "../books/book.schema";
-
 import { Borrow } from "../borrow/borrow.schema";
-
 import { Favorite } from "../favorite/favorite.schema";
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 
@@ -24,10 +22,27 @@ export class AnalyticsService {
 
     @InjectModel(Favorite.name)
     private favoriteModel: Model<Favorite>,
-  ) {}
+
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
+  ) { }
 
   async getDashboard(user) {
 
+    const cacheKey =
+      `analytics:${user.email}`;
+
+    const cached =
+      await this.cacheManager.get(cacheKey);
+
+    if (cached) {
+
+      console.log(
+        "ANALYTICS CACHE HIT"
+      );
+
+      return cached;
+    }
     // TOTAL BOOKS
 
     const totalBooks =
@@ -91,7 +106,7 @@ export class AnalyticsService {
         },
       });
 
-    return {
+    const response = {
 
       success: true,
 
@@ -107,5 +122,13 @@ export class AnalyticsService {
 
       favoriteBooksList,
     };
+
+    await this.cacheManager.set(
+      cacheKey,
+      response,
+      60000
+    );
+
+    return response;
   }
 }
