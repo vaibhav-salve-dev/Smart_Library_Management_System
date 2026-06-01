@@ -4,23 +4,27 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {RateLimitGuard} from '../common/guards/login_throttler.guard';
+import { RateLimitGuard } from '../common/guards/login_throttler.guard';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
     constructor(private authService: AuthService) { }
+   
+    @ApiOperation({
+        summary: 'Register user'
+    })
     @Post("/register")
     register(@Body() body: RegisterDto) {
 
         return this.authService.registerUser(body);
     }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Get("/users")
-    getAllUsers() {
-        return this.authService.findAllUser();
-    }
-
+    @ApiOperation({
+        summary: 'login user'
+    })
     @UseGuards(RateLimitGuard)
     @Post("/login")
     getUser(@Body() body: LoginDto) {
@@ -29,6 +33,9 @@ export class AuthController {
         // return body;
     }
 
+    @ApiOperation({
+        summary: 'Refresh the access token to avoid authorization issue'
+    })
     @Post("/refresh")
     refresh(@Body() body: any) {
 

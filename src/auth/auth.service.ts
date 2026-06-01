@@ -72,12 +72,6 @@ export class AuthService {
     return result;
   }
 
-  findAllUser() {
-
-    return this.user.findAll();
-
-  }
-
   async findUser(body) {
 
     let target =

@@ -390,7 +390,6 @@ await this.invalidateBooksCache();
         );
       }
 
-      await this.cacheManager.clear();
 
       return {
         success: true,

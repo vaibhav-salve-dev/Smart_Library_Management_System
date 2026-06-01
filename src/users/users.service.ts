@@ -48,21 +48,7 @@ export class UsersService {
 
   }
 
-  async findAll() {
-    try {
-      let result = await this.userModel.find();
-      return {
-        success: true,
-        user: result
-      }
-    } catch (error) {
-      console.log("display:", error);
-      return {
-        success: false,
-        message: "Something went wrong !"
-      }
-    }
-  }
+ 
   async findByEmail(email: string) {
     try {
 

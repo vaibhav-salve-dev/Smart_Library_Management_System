@@ -2,20 +2,51 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
+import {
+  SwaggerModule,
+  DocumentBuilder,
+} from '@nestjs/swagger';
+
 async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
-    new ValidationPipe()
+    new ValidationPipe(),
   );
 
   app.enableCors({
     origin: 'http://localhost:5173',
-    credentials: true
+    credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  const config =
+    new DocumentBuilder()
+      .setTitle(
+        'Smart Library Management System API',
+      )
+      .setDescription(
+        'API documentation for Library Management System',
+      )
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+
+  const document =
+    SwaggerModule.createDocument(
+      app,
+      config,
+    );
+
+  SwaggerModule.setup(
+    'api',
+    app,
+    document,
+  );
+
+  await app.listen(
+    process.env.PORT ?? 3000,
+  );
 }
 
 bootstrap();
