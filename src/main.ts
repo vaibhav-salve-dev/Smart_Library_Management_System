@@ -16,7 +16,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: 'https://smart-library-management-system-fro.vercel.app',
     credentials: true,
   });
 
