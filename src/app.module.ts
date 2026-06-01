@@ -16,7 +16,7 @@ import { CacheModule } from '@nestjs/cache-manager';
   }), CacheModule.register({
     isGlobal: true,
     ttl: 60 * 1000, // 1 minute
-  }), AuthModule, MongooseModule.forRoot(process.env.mongo), UsersModule, BooksModule, BorrowModule, AnalyticsModule],
+  }), AuthModule, MongooseModule.forRoot(process.env.mongo!), UsersModule, BooksModule, BorrowModule, AnalyticsModule],
   controllers: [AppController],
   providers: [AppService, CloudinaryProvider],
   exports: [CloudinaryProvider]
