@@ -16,7 +16,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'https://smart-library-management-system-fro.vercel.app',
+    origin: 'https://vaibhav-library.vercel.app',
     credentials: true,
   });
 
